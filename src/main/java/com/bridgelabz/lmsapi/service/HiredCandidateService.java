@@ -10,8 +10,13 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -22,8 +27,12 @@ public class HiredCandidateService implements IHiredCandidateService {
 
     @Autowired
     private ModelMapper modelMapper;
+
     @Autowired
     private HiredCandidateRepository hiredCandidateRepository;
+
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     @Override
     public Response saveDataInBatchToDatabase(MultipartFile file) {
@@ -84,7 +93,7 @@ public class HiredCandidateService implements IHiredCandidateService {
                 }
                 flag = false;
             }
-        } catch (IOException e) {
+        } catch (IOException | MessagingException e) {
             e.printStackTrace();
         }
         return new Response(200, "Data Saved Successfully");
@@ -96,13 +105,53 @@ public class HiredCandidateService implements IHiredCandidateService {
     }
 
     @Override
-    public void save(HiredCandidateDTO hiredCandidateDTO) {
+    public void save(HiredCandidateDTO hiredCandidateDTO) throws MessagingException {
         HiredCandidate hiredCandidate = modelMapper.map(hiredCandidateDTO, HiredCandidate.class);
         hiredCandidateRepository.save(hiredCandidate);
+        this.sendMail(hiredCandidate);
     }
 
     @Override
     public HiredCandidate getCandidateProfile(long id) {
         return hiredCandidateRepository.findById(id).get();
+    }
+
+    @Override
+    public Response updateCandidateStatus(String response, String email) {
+        HiredCandidate candidate = hiredCandidateRepository.findByEmail(email);
+        candidate.setStatus(response);
+        hiredCandidateRepository.save(candidate);
+        return new Response(200, "Status Updated Successfully");
+    }
+
+    @Override
+    public void sendMail(HiredCandidate hiredCandidate) throws MessagingException {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+        helper.setTo(hiredCandidate.getEmail());
+        helper.setText("Hii, " + hiredCandidate.getFirstName() + " " + hiredCandidate.getLastName() + " " +
+                "You have been selected to our Fellowship Program. please click on the following " +
+                "link to accept the offer. " + "\n" + "http://localhost:8080/hiredcandidate" +
+                "/updatestatus?response=Accepted&email=" + hiredCandidate.getEmail() + "\n\n"
+                + "Please click on following link to reject the offer. " + "\n" + "http://localhost:8080/" +
+                "hiredcandidate/updatestatus?response=Rejected&email=" + hiredCandidate.getEmail() + "\n\n");
+        helper.setSubject("Fellowship Offer From BridgeLabz");
+        javaMailSender.send(message);
+    }
+
+    @Override
+    public Response joinCandidate() throws MessagingException {
+        List<HiredCandidate> acceptedCandidates = hiredCandidateRepository.findByStatus("Accepted");
+        for (HiredCandidate candidate : acceptedCandidates) {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message);
+            helper.setTo(candidate.getEmail());
+            helper.setText("Hii, " + candidate.getFirstName() + " " + candidate.getLastName() + " " +
+                    "As per your confirmation, You have been officially admitted to BridgeLabz Fellowship" +
+                    "Program");
+            helper.setSubject("Fellowship Job from BridgeLabz");
+            javaMailSender.send(message);
+        }
+        return new Response(200, "Mail Sent Successfully");
     }
 }
