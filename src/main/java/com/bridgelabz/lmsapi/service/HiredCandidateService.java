@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.List;
 
 @Service
 public class HiredCandidateService implements IHiredCandidateService {
@@ -89,8 +90,19 @@ public class HiredCandidateService implements IHiredCandidateService {
         return new Response(200, "Data Saved Successfully");
     }
 
-    private void save(HiredCandidateDTO hiredCandidateDTO) {
+    @Override
+    public List getHiredCandidateList() {
+        return hiredCandidateRepository.findAll();
+    }
+
+    @Override
+    public void save(HiredCandidateDTO hiredCandidateDTO) {
         HiredCandidate hiredCandidate = modelMapper.map(hiredCandidateDTO, HiredCandidate.class);
         hiredCandidateRepository.save(hiredCandidate);
+    }
+
+    @Override
+    public HiredCandidate getCandidateProfile(long id) {
+        return hiredCandidateRepository.findById(id).get();
     }
 }
