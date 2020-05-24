@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.MessagingException;
 import java.util.List;
 
 @RestController
@@ -27,7 +28,17 @@ public class HiredCandidateController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HiredCandidate> getCandidateProfile (@PathVariable long id) {
+    public ResponseEntity<HiredCandidate> getCandidateProfile(@PathVariable long id) {
         return ResponseEntity.ok(hiredCandidateService.getCandidateProfile(id));
+    }
+
+    @PutMapping("/updatestatus")
+    public ResponseEntity<Response> updateCandidateStatus(@RequestParam String response, @RequestParam String email) {
+        return ResponseEntity.ok(hiredCandidateService.updateCandidateStatus(response, email));
+    }
+
+    @GetMapping("/jointhecandidate")
+    public ResponseEntity<Response> joinCandidate() throws MessagingException {
+        return ResponseEntity.ok(hiredCandidateService.joinCandidate());
     }
 }
