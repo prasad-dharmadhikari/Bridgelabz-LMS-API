@@ -66,7 +66,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/user/register", "/user/forgot-password",
                         "/user/reset-password", "/hiredcandidate/save",
                         "/hiredcandidate/candidates",
-                        "/hiredcandidate/{id}").permitAll().
+                        "/hiredcandidate/{id}",
+                        "/hiredcandidate/updatestatus",
+                        "/hiredcandidate/jointhecandidate").permitAll().
                 // all other requests need to be authenticated
                         anyRequest().authenticated().and().
                 // make sure we use stateless session; session won't be used to
