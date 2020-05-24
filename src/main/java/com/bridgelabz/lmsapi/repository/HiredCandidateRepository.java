@@ -4,6 +4,10 @@ import com.bridgelabz.lmsapi.model.HiredCandidate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface HiredCandidateRepository extends JpaRepository<HiredCandidate, Long> {
+    HiredCandidate findByEmail(String email);
+    List<HiredCandidate> findByStatus(String status);
 }
