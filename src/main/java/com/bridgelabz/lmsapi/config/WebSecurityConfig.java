@@ -68,7 +68,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/hiredcandidate/candidates",
                         "/hiredcandidate/{id}",
                         "/hiredcandidate/updatestatus",
-                        "/hiredcandidate/jointhecandidate").permitAll().
+                        "/hiredcandidate/jointhecandidate",
+                        "/swagger-resources/**"
+                        , "/swagger-ui.html", "/v2/api-docs"
+                        , "/webjars/**").permitAll().
                 // all other requests need to be authenticated
                         anyRequest().authenticated().and().
                 // make sure we use stateless session; session won't be used to
