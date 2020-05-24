@@ -16,27 +16,27 @@ import javax.mail.MessagingException;
 @RequestMapping("/user")
 public class UserController {
 
-	@Autowired
-	private IUserService userService;
+    @Autowired
+    private IUserService userService;
 
-	@PostMapping("/register")
-	public ResponseEntity<Response> saveUser(@RequestBody UserDTO userDTO) {
-		return ResponseEntity.ok(userService.save(userDTO));
-	}
+    @PostMapping("/register")
+    public ResponseEntity<Response> saveUser(@RequestBody UserDTO userDTO) {
+        return ResponseEntity.ok(userService.save(userDTO));
+    }
 
     @PostMapping("/authenticate")
     public ResponseEntity<JwtResponse> authenticate(@RequestBody LoginDTO loginRequest) throws Exception {
-		String token = userService.getAuthenticationToken(loginRequest);
-		return ResponseEntity.ok(new JwtResponse(token));
-	}
+        String token = userService.getAuthenticationToken(loginRequest);
+        return ResponseEntity.ok(new JwtResponse(token));
+    }
 
-	@PostMapping("/forgot-password")
-	public ResponseEntity<Response> forgotPassword (@RequestParam String email) throws MessagingException {
-		return ResponseEntity.ok(userService.sendMail(email));
-	}
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Response> forgotPassword(@RequestParam String email) throws MessagingException {
+        return ResponseEntity.ok(userService.sendMail(email));
+    }
 
-	@PostMapping("/reset-password")
-	public ResponseEntity<Response> resetPassword (@RequestParam String token, @RequestParam("password") String password) {
-		return ResponseEntity.ok(userService.resetPassword(token, password));
-	}
+    @PostMapping("/reset-password")
+    public ResponseEntity<Response> resetPassword(@RequestParam String token, @RequestParam("password") String password) {
+        return ResponseEntity.ok(userService.resetPassword(token, password));
+    }
 }
