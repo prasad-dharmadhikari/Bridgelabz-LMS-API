@@ -26,13 +26,13 @@ import java.util.List;
 public class HiredCandidateService implements IHiredCandidateService {
 
     @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
     private HiredCandidateRepository hiredCandidateRepository;
 
     @Autowired
     private JavaMailSender javaMailSender;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public Response saveDataInBatchToDatabase(MultipartFile file) {
@@ -140,7 +140,7 @@ public class HiredCandidateService implements IHiredCandidateService {
     }
 
     @Override
-    public Response joinCandidate() throws MessagingException {
+    public Response sendJobOfferNotification() throws MessagingException {
         List<HiredCandidate> acceptedCandidates = hiredCandidateRepository.findByStatus("Accepted");
         for (HiredCandidate candidate : acceptedCandidates) {
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -148,7 +148,7 @@ public class HiredCandidateService implements IHiredCandidateService {
             helper.setTo(candidate.getEmail());
             helper.setText("Hii, " + candidate.getFirstName() + " " + candidate.getLastName() + " " +
                     "As per your confirmation, You have been officially admitted to BridgeLabz Fellowship" +
-                    "Program");
+                    " Program.");
             helper.setSubject("Fellowship Job from BridgeLabz");
             javaMailSender.send(message);
         }
