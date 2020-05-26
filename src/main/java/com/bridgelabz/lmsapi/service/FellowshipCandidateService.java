@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 
 @Service
@@ -39,7 +40,7 @@ public class FellowshipCandidateService implements IFellowshipCandidateService {
 
     @Override
     public Response joinTheCandidateToFellowshipProgram(FellowshipCandidateDTO fellowshipCandidateDTO) {
-        HiredCandidate acceptedCandidate = hiredCandidateRepository.findByStatusAndId("Accepted", fellowshipCandidateDTO.getId());
+        HiredCandidate acceptedCandidate = hiredCandidateRepository.findByStatusAndId("Accepted", fellowshipCandidateDTO.getCandidateId());
         fellowshipCandidateDTO.setIsBirthDateVerified("yes");
         fellowshipCandidateDTO.setPhotoPath("verified");
         fellowshipCandidateDTO.setJoiningDate(LocalDate.now());
@@ -49,5 +50,11 @@ public class FellowshipCandidateService implements IFellowshipCandidateService {
         FellowshipCandidate fellowshipCandidate = modelMapper.map(fellowshipCandidateDTO, FellowshipCandidate.class);
         fellowshipCandidateRepository.save(fellowshipCandidate);
         return new Response(200, "Candidate Joined Successfully");
+    }
+
+    @Override
+    public Response getCandidateCount() {
+        long candidateCount = fellowshipCandidateRepository.count();
+        return new Response(200, "Total no of candidates are : " + candidateCount);
     }
 }
