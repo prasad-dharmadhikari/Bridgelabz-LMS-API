@@ -18,4 +18,9 @@ public class FellowshipCandidateController {
     public ResponseEntity<Response> joinCandidate(@RequestBody FellowshipCandidateDTO fellowshipCandidateDTO) {
         return ResponseEntity.ok(fellowshipCandidateService.joinTheCandidateToFellowshipProgram(fellowshipCandidateDTO));
     }
+
+    @GetMapping("/getcandidatecount")
+    public ResponseEntity<Response> getCandidateCount() {
+        return ResponseEntity.ok(fellowshipCandidateService.getCandidateCount());
+    }
 }
