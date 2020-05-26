@@ -148,7 +148,16 @@ public class HiredCandidateService implements IHiredCandidateService {
             helper.setTo(candidate.getEmail());
             helper.setText("Hii, " + candidate.getFirstName() + " " + candidate.getLastName() + " " +
                     "As per your confirmation, You have been officially admitted to BridgeLabz Fellowship" +
-                    " Program.");
+                    " Program." + "\n\n" + "We need you to update your personal information, " +
+                    "your bank information and your educational information " +
+                    " for our records." + "\n\n" + "Click on following links to do the same." +
+                    "\n\n" + "For Personal Information : " + "\n\n" +
+                    "http://localhost:8080/fellowshipcandidate/jointhecandidate" + "\n\n" +
+                    "For Educational information : " + "\n\n" +
+                    "http://localhost:8080/candidatequalification/educationalinfo" + "\n\n" +
+                    "For Bank Information : " + "\n\n" +
+                    "http://localhost:8080/candidatebank/bankinfo"
+            );
             helper.setSubject("Fellowship Job from BridgeLabz");
             javaMailSender.send(message);
         }
