@@ -37,8 +37,9 @@ public class HiredCandidateController {
         return ResponseEntity.ok(hiredCandidateService.updateCandidateStatus(response, email));
     }
 
-    @GetMapping("/jointhecandidate")
-    public ResponseEntity<Response> joinCandidate() throws MessagingException {
-        return ResponseEntity.ok(hiredCandidateService.joinCandidate());
+    @GetMapping("/sendjobnotification")
+    public ResponseEntity<Response> sendJobOfferNotification() throws MessagingException {
+        return ResponseEntity.ok(hiredCandidateService.sendJobOfferNotification());
     }
+
 }
