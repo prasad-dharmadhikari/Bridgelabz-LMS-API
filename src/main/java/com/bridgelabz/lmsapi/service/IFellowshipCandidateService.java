@@ -5,4 +5,5 @@ import com.bridgelabz.lmsapi.dto.Response;
 
 public interface IFellowshipCandidateService {
     Response joinTheCandidateToFellowshipProgram(FellowshipCandidateDTO fellowshipCandidateDTO);
+    Response getCandidateCount();
 }
