@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface HiredCandidateRepository extends JpaRepository<HiredCandidate, Long> {
     HiredCandidate findByEmail(String email);
+    HiredCandidate findByStatusAndId(String status, Long id);
     List<HiredCandidate> findByStatus(String status);
 }
