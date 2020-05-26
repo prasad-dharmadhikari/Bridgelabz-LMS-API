@@ -15,5 +15,5 @@ public interface IHiredCandidateService {
     HiredCandidate getCandidateProfile(long id);
     Response updateCandidateStatus(String response, String email);
     void sendMail(HiredCandidate hiredCandidate) throws MessagingException;
-    Response joinCandidate() throws MessagingException;
+    Response sendJobOfferNotification() throws MessagingException;
 }
