@@ -10,7 +10,7 @@ import java.util.Date;
 @Getter(AccessLevel.PUBLIC)
 @Setter(AccessLevel.PUBLIC)
 public class FellowshipCandidateDTO {
-    private long id;
+    private long candidateId;
     private String firstName;
     private String middleName;
     private String lastName;
