@@ -16,7 +16,7 @@ import java.util.Date;
 @Table(name = "fellowship_candidate")
 public class FellowshipCandidate {
     @Id
-    private long id;
+    private long candidateId;
     private String firstName;
     private String middleName;
     private String lastName;
