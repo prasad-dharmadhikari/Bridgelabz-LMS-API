@@ -46,4 +46,12 @@ public class FellowshipCandidate {
     private String remark;
     private Date creatorStamp;
     private String creatorUser;
+
+    public FellowshipCandidate() {
+    }
+
+    public FellowshipCandidate(long id) {
+        this.candidateId = id;
+    }
+
 }

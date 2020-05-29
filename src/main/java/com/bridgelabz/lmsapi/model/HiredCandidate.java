@@ -11,8 +11,6 @@ import java.util.Date;
 @Getter(AccessLevel.PUBLIC)
 @Setter(AccessLevel.PUBLIC)
 @Entity(name = "hired_candidate")
-@NamedQuery(name = "HiredCandidate.findByEmail", query = "select h from hired_candidate h where h.email = ?1")
-@NamedQuery(name = "HiredCandidate.findByStatus", query = "select h from hired_candidate h where h.status = ?1")
 @Table(name = "hired_candidate")
 public class HiredCandidate {
     @Id
