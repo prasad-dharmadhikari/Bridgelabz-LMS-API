@@ -1,6 +1,7 @@
 package com.bridgelabz.lmsapi.controller;
 
-import com.bridgelabz.lmsapi.dto.Response;
+import com.bridgelabz.lmsapi.response.Response;
+import com.bridgelabz.lmsapi.exception.LmsApiApplicationException;
 import com.bridgelabz.lmsapi.model.HiredCandidate;
 import com.bridgelabz.lmsapi.service.IHiredCandidateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ public class HiredCandidateController {
     private IHiredCandidateService hiredCandidateService;
 
     @PostMapping("/save")
-    public ResponseEntity<Response> saveDataInBatch(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Response> saveDataInBatch(@RequestParam("file") MultipartFile file) throws LmsApiApplicationException {
         return ResponseEntity.ok(hiredCandidateService.saveDataInBatchToDatabase(file));
     }
 
@@ -33,7 +34,7 @@ public class HiredCandidateController {
     }
 
     @PutMapping("/updatestatus")
-    public ResponseEntity<Response> updateCandidateStatus(@RequestParam String response, @RequestParam String email) {
+    public ResponseEntity<Response> updateCandidateStatus(@RequestParam String response, @RequestParam String email) throws LmsApiApplicationException {
         return ResponseEntity.ok(hiredCandidateService.updateCandidateStatus(response, email));
     }
 
@@ -41,5 +42,4 @@ public class HiredCandidateController {
     public ResponseEntity<Response> sendJobOfferNotification() throws MessagingException {
         return ResponseEntity.ok(hiredCandidateService.sendJobOfferNotification());
     }
-
 }
