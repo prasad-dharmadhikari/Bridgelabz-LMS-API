@@ -3,9 +3,11 @@ package com.bridgelabz.lmsapi.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import com.bridgelabz.lmsapi.config.ApplicationConfiguration;
 import com.bridgelabz.lmsapi.dto.LoginDTO;
-import com.bridgelabz.lmsapi.dto.Response;
+import com.bridgelabz.lmsapi.response.Response;
 import com.bridgelabz.lmsapi.dto.UserDTO;
+import com.bridgelabz.lmsapi.exception.LmsApiApplicationException;
 import com.bridgelabz.lmsapi.model.User;
 import com.bridgelabz.lmsapi.repository.UserRepository;
 import com.bridgelabz.lmsapi.util.JwtTokenUtil;
@@ -22,7 +24,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
@@ -64,7 +65,7 @@ public class UserService implements IUserService, UserDetailsService {
         userDTO.setPassword(bcryptEncoder.encode(userDTO.getPassword()));
         User newUser = modelMapper.map(userDTO, User.class);
         userRepository.save(newUser);
-        return new Response(200, "Registration Successful");
+        return new Response(101, ApplicationConfiguration.getMessageAccessor().getMessage("101"));
     }
 
     @Override
@@ -76,8 +77,10 @@ public class UserService implements IUserService, UserDetailsService {
     }
 
     @Override
-    public Response sendMail(String email) throws MessagingException {
+    public Response sendMail(String email) throws MessagingException, LmsApiApplicationException {
         User user = userRepository.findByEmail(email);
+        if (user == null)
+            throw new LmsApiApplicationException(LmsApiApplicationException.exceptionType.USER_NOT_FOUND, "User not found");
         final String token = jwtTokenUtil.generatePasswordResetToken(String.valueOf(user.getId()));
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
@@ -86,13 +89,13 @@ public class UserService implements IUserService, UserDetailsService {
                 "http://localhost:8080/user/reset-password?token=" + token);
         helper.setSubject("Password Reset Request");
         javaMailSender.send(message);
-        return new Response(200, "Mail Sent Successfully");
+        return new Response(102, ApplicationConfiguration.getMessageAccessor().getMessage("102"));
     }
 
     @Override
-    public Response resetPassword(String token, String password) {
+    public Response resetPassword(String token, String password) throws LmsApiApplicationException {
         if (jwtTokenUtil.isTokenExpired(token)) {
-            return null;
+            throw new LmsApiApplicationException(LmsApiApplicationException.exceptionType.INVALID_TOKEN, "Token expired");
         }
         String encodedPassword = bcryptEncoder.encode(password);
         long id = Long.parseLong(jwtTokenUtil.getSubjectFromToken(token));
@@ -100,8 +103,8 @@ public class UserService implements IUserService, UserDetailsService {
         user.setPassword(encodedPassword);
         User updatedUser = userRepository.save(user);
         if (updatedUser != null && updatedUser.getPassword().equalsIgnoreCase(encodedPassword))
-            return new Response(200, "Password Reset Successfully");
-        return new Response(500, "Something went wrong");
+            return new Response(103, ApplicationConfiguration.getMessageAccessor().getMessage("103"));
+        return new Response(104, ApplicationConfiguration.getMessageAccessor().getMessage("104"));
     }
 
     public void authenticate(String username, String password) throws Exception {

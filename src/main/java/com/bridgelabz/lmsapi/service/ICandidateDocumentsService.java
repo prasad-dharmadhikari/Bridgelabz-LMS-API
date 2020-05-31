@@ -1,6 +1,6 @@
 package com.bridgelabz.lmsapi.service;
 
-import com.bridgelabz.lmsapi.dto.Response;
+import com.bridgelabz.lmsapi.response.Response;
 import com.bridgelabz.lmsapi.model.CandidateDocuments;
 import org.springframework.web.multipart.MultipartFile;
 
