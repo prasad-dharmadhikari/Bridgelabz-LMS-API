@@ -23,6 +23,8 @@ public class CandidateDocumentsDTO {
     @NotNull
     private String documentName;
     @NotNull
+    private String documentPath;
+    @NotNull
     @Builder.Default
     private String status = Status.RECEIVED.toString();
     @NotNull
