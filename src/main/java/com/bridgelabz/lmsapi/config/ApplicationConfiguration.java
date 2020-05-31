@@ -1,6 +1,5 @@
 package com.bridgelabz.lmsapi.config;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
@@ -10,7 +9,6 @@ import javax.annotation.PostConstruct;
 import java.util.Locale;
 
 @Configuration
-@EnableAutoConfiguration
 @EnableSwagger2
 public class ApplicationConfiguration {
     private static MessageSourceAccessor messageSourceAccessor;
