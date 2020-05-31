@@ -32,6 +32,8 @@ public class CandidateDocuments {
     @NotNull
     private String documentName;
     @NotNull
+    private String documentPath;
+    @NotNull
     private String status;
     @NotNull
     private LocalDateTime creatorStamp;
