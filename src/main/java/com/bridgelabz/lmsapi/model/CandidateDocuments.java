@@ -28,10 +28,9 @@ public class CandidateDocuments {
     @NotNull
     private String documentType;
     @NotNull
-    private String documentName;
+    private String fileType;
     @NotNull
-    @Lob
-    private byte[] document;
+    private String documentName;
     @NotNull
     private String status;
     @NotNull
