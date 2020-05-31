@@ -1,12 +1,13 @@
 package com.bridgelabz.lmsapi.dto;
 
 import com.bridgelabz.lmsapi.model.FellowshipCandidate;
+import com.bridgelabz.lmsapi.util.Status;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
-import java.io.StringReader;
 import java.time.LocalDateTime;
 
 
@@ -18,13 +19,15 @@ public class CandidateDocumentsDTO {
     @NotNull
     private String documentType;
     @NotNull
+    private String fileType;
+    @NotNull
     private String documentName;
     @NotNull
-    private byte[] document;
+    @Builder.Default
+    private String status = Status.RECEIVED.toString();
     @NotNull
-    private String status;
-    @NotNull
-    private LocalDateTime creatorStamp;
+    @Builder.Default
+    private LocalDateTime creatorStamp = LocalDateTime.now();
     @NotNull
     private String creatorUser;
 }

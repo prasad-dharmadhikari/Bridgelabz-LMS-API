@@ -1,7 +1,9 @@
 package com.bridgelabz.lmsapi.dto;
 
 import com.bridgelabz.lmsapi.model.FellowshipCandidate;
+import com.bridgelabz.lmsapi.util.Status;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,16 +17,21 @@ public class CandidateBankDetailsDTO {
     private FellowshipCandidate fellowshipCandidate;
     private String accountName;
     private long accountNumber;
-    private String isAccountNumberVerified;
+    @Builder.Default
+    private String isAccountNumberVerified = Status.YES.toString();
     @Pattern(regexp = "[A-Z|a-z]{4}[0][\\d]{6}$")
     private String ifscCode;
-    private String isIfscCodeVerified;
+    @Builder.Default
+    private String isIfscCodeVerified = Status.YES.toString();
     @Pattern(regexp = "[A-Z]{5}[0-9]{4}[A-Z]{1}")
     private String panNumber;
-    private String isPanNumberVerified;
+    @Builder.Default
+    private String isPanNumberVerified = Status.YES.toString();
     @Pattern(regexp = "^\\d{4}\\s\\d{4}\\s\\d{4}$")
     private String adhaarNumber;
-    private String isAdhaarNumberVerified;
-    private LocalDateTime creatorStamp;
+    @Builder.Default
+    private String isAdhaarNumberVerified = Status.YES.toString();
+    @Builder.Default
+    private LocalDateTime creatorStamp = LocalDateTime.now();
     private String creatorUser;
 }

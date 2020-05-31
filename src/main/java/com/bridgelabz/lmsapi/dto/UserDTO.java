@@ -1,7 +1,9 @@
 package com.bridgelabz.lmsapi.dto;
 
+import com.bridgelabz.lmsapi.util.Status;
 import com.sun.istack.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,8 +30,10 @@ public class UserDTO {
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]*.{8,}$")
     private String password;
     private long contactNumber;
-    private String verified;
+    @Builder.Default
+    private String verified = Status.VERIFIED.toString();
     @NotNull
-    private LocalDateTime creatorStamp;
+    @Builder.Default
+    private LocalDateTime creatorStamp = LocalDateTime.now();
     private String creatorUser;
 }

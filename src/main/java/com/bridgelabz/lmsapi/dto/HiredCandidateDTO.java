@@ -1,6 +1,8 @@
 package com.bridgelabz.lmsapi.dto;
 
+import com.bridgelabz.lmsapi.util.Status;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,7 +27,8 @@ public class HiredCandidateDTO {
     private String communicationRemark;
     private String knowledgeRemark;
     private String aggregateRemark;
-    private String status;
+    @Builder.Default
+    private String status = Status.PENDING.toString();
     private Date creatorStamp;
     private String creatorUser;
 }
