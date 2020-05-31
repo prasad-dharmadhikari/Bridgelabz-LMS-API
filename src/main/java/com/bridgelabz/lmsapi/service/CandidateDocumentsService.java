@@ -7,16 +7,24 @@ import com.bridgelabz.lmsapi.model.CandidateDocuments;
 import com.bridgelabz.lmsapi.model.FellowshipCandidate;
 import com.bridgelabz.lmsapi.repository.CandidateDocumentsRepository;
 import com.bridgelabz.lmsapi.repository.FellowshipCandidateRepository;
+import com.bridgelabz.lmsapi.util.Status;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 public class CandidateDocumentsService implements ICandidateDocumentsService {
+
+    @Autowired
+    private Cloudinary cloudinaryConfig;
 
     @Autowired
     private FellowshipCandidateRepository fellowshipCandidateRepository;
@@ -28,18 +36,32 @@ public class CandidateDocumentsService implements ICandidateDocumentsService {
     private ModelMapper modelMapper;
 
     @Override
-    public Response saveDocument(MultipartFile file, long id) throws IOException {
+    public Response saveDocument(MultipartFile file, long id, String type) throws IOException {
         CandidateDocumentsDTO candidateDocumentsDTO = new CandidateDocumentsDTO();
         candidateDocumentsDTO.setFellowshipCandidate(new FellowshipCandidate(id));
-        //candidateDocumentsDTO.setDocument(file.getBytes());
         candidateDocumentsDTO.setDocumentName(file.getOriginalFilename());
-        candidateDocumentsDTO.setDocumentType(file.getContentType());
-        candidateDocumentsDTO.setStatus("Received");
-        candidateDocumentsDTO.setCreatorStamp(LocalDateTime.now());
+        candidateDocumentsDTO.setDocumentType(type);
+        candidateDocumentsDTO.setDocumentPath(uploadFile(file));
+        candidateDocumentsDTO.setFileType(file.getContentType());
+        candidateDocumentsDTO.setStatus(Status.RECEIVED.toString());
         candidateDocumentsDTO.setCreatorUser(fellowshipCandidateRepository.findById(id).get().getFirstName());
         CandidateDocuments candidateDocument = modelMapper.map(candidateDocumentsDTO, CandidateDocuments.class);
         candidateDocumentsRepository.save(candidateDocument);
         return new Response(110, ApplicationConfiguration.getMessageAccessor().getMessage("110"));
+    }
+
+    private String uploadFile(MultipartFile file) throws IOException {
+        File fileToUpload = convertMultipartToFile(file);
+        Map uploadResult = cloudinaryConfig.uploader().upload(fileToUpload, ObjectUtils.emptyMap());
+        return uploadResult.get("url").toString();
+    }
+
+    private File convertMultipartToFile(MultipartFile file) throws IOException {
+        File convFile = new File(file.getOriginalFilename());
+        FileOutputStream fos = new FileOutputStream(convFile);
+        fos.write(file.getBytes());
+        fos.close();
+        return convFile;
     }
 
     @Override
