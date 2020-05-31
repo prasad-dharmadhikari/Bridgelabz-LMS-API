@@ -46,22 +46,14 @@ public class FellowshipCandidateController {
         return ResponseEntity.ok(candidateBankDetailsService.updateCandidateBankInfo(candidateBankDetailsDTO));
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<Response> uploadDocuments(@RequestParam("file") MultipartFile file, @RequestParam("id") long id) throws IOException {
-        return ResponseEntity.ok(candidateDocumentsService.saveDocument(file, id));
+    @PostMapping("/upload/{id}")
+    public ResponseEntity<Response> uploadDocuments(@PathVariable long id, @RequestParam("file") MultipartFile file,
+                                                    @RequestParam("type") String type) throws IOException {
+        return ResponseEntity.ok(candidateDocumentsService.saveDocument(file, id, type));
     }
 
     @PostMapping("/educationalinfo")
     public ResponseEntity<Response> updateCandidateQualificationInfo (@RequestBody CandidateQualificationDTO candidateQualificationDTO) {
         return ResponseEntity.ok(candidateQualificationService.updateCandidateQualificationInfo(candidateQualificationDTO));
     }
-
-//    @GetMapping("/download/{id}")
-//    public ResponseEntity<Resource> downloadFile(@PathVariable long id) {
-//        CandidateDocuments candidateDocument = candidateDocumentsService.getFile(id);
-//        return ResponseEntity.ok()
-//                .contentType(MediaType.parseMediaType(candidateDocument.getDocumentType()))
-//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + candidateDocument.getDocumentName() + "\"")
-//                .body(new ByteArrayResource(candidateDocument.getDocument()));
-//    }
 }
