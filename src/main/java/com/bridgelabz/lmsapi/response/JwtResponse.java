@@ -1,4 +1,4 @@
-package com.bridgelabz.lmsapi.dto;
+package com.bridgelabz.lmsapi.response;
 
 import java.io.Serializable;
 
