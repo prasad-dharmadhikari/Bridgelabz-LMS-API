@@ -1,4 +1,4 @@
 package com.bridgelabz.lmsapi.config;
 
-public class SwaggerConfig {
+public class MailConfig {
 }
