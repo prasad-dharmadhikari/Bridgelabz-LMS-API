@@ -23,8 +23,10 @@ import java.util.Map;
 @Service
 public class CandidateDocumentsService implements ICandidateDocumentsService {
 
-    @Autowired
-    private Cloudinary cloudinaryConfig;
+    private final Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap
+            ("cloud_name", System.getenv().get("cloudinary.cloud_name"),
+                    "api_key", System.getenv().get("cloudinary.api_key"),
+                    "api_secret", System.getenv().get("cloudinary.api_secret")));
 
     @Autowired
     private FellowshipCandidateRepository fellowshipCandidateRepository;
@@ -52,7 +54,7 @@ public class CandidateDocumentsService implements ICandidateDocumentsService {
 
     private String uploadFile(MultipartFile file) throws IOException {
         File fileToUpload = convertMultipartToFile(file);
-        Map uploadResult = cloudinaryConfig.uploader().upload(fileToUpload, ObjectUtils.emptyMap());
+        Map uploadResult = cloudinary.uploader().upload(fileToUpload, ObjectUtils.emptyMap());
         return uploadResult.get("url").toString();
     }
 
