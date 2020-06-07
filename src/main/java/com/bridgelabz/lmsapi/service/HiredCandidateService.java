@@ -2,10 +2,13 @@ package com.bridgelabz.lmsapi.service;
 
 import com.bridgelabz.lmsapi.config.ApplicationConfiguration;
 import com.bridgelabz.lmsapi.dto.HiredCandidateDTO;
+import com.bridgelabz.lmsapi.dto.MailDTO;
 import com.bridgelabz.lmsapi.response.Response;
 import com.bridgelabz.lmsapi.exception.LmsApiApplicationException;
 import com.bridgelabz.lmsapi.model.HiredCandidate;
 import com.bridgelabz.lmsapi.repository.HiredCandidateRepository;
+import com.bridgelabz.lmsapi.util.RabbitMQ;
+import com.bridgelabz.lmsapi.util.Status;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -17,6 +20,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
@@ -36,6 +40,16 @@ public class HiredCandidateService implements IHiredCandidateService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private RabbitMQ rabbitMQ;
+
+    @Autowired
+    private MailDTO mailDTO;
+
+    String personalInfo = "<html><body><p><a href='http://localhost:8080/fellowshipcandidate/jointhecandidate'><img src='cid:identifier11'></a></p></body></html>";
+    String bankInfo = "<html><body><p><a href='http://localhost:8080/fellowshipcandidate/educationalinfo'><img src='cid:identifier22'></a></p></body></html>";
+    String educationalInfo = "<html><body><p><a href='http://localhost:8080/fellowshipcandidate/bankinfo'><img src='cid:identifier33'></a></p></body></html>";
 
     @Override
     public Response saveDataInBatchToDatabase(MultipartFile file) throws LmsApiApplicationException {
@@ -133,33 +147,23 @@ public class HiredCandidateService implements IHiredCandidateService {
 
     @Override
     public void sendMail(HiredCandidate hiredCandidate) throws MessagingException {
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setTo(hiredCandidate.getEmail());
-        String Accepted = "<html><body><p><a href='http://localhost:8080/hiredcandidate/updatestatus?response=ACCEPTED&email="+hiredCandidate.getEmail()+"'><img src='cid:identifier1234'></a></p></body></html>";
-        String Rejected = "<html><body><p><a href='http://localhost:8080/hiredcandidate/updatestatus?response=REJECTED&email="+hiredCandidate.getEmail()+"'><img src='cid:identifier5678'></a></p></body></html>";
-        helper.setText("Hii, " + hiredCandidate.getFirstName() + " " + hiredCandidate.getLastName() + " " +
+        String Accepted = "<html><body><p><a href='http://localhost:8080/hiredcandidate/updatestatus?response=ACCEPTED&email=" + hiredCandidate.getEmail() + "'><img src='cid:identifier1234'></a></p></body></html>";
+        String Rejected = "<html><body><p><a href='http://localhost:8080/hiredcandidate/updatestatus?response=REJECTED&email=" + hiredCandidate.getEmail() + "'><img src='cid:identifier5678'></a></p></body></html>";
+        mailDTO.setTo(hiredCandidate.getEmail());
+        mailDTO.setBody("Hii, " + hiredCandidate.getFirstName() + " " + hiredCandidate.getLastName() + " " +
                 "You have been selected to our Fellowship Program. please click on the following " +
-                "link to accept the offer. " + "\n" + Accepted +"\nPlease click on following link to reject the offer. " + "\n" + Rejected, true);
-        FileSystemResource acceptedButton = new FileSystemResource(new File("C:\\Users\\personal\\Desktop\\lmsapi\\src\\main\\resources\\accepted.jpg"));
-        helper.addInline("identifier1234", acceptedButton);
-        FileSystemResource rejectedButton = new FileSystemResource(new File("C:\\Users\\personal\\Desktop\\lmsapi\\src\\main\\resources\\rejected.jpg"));
-        helper.addInline("identifier5678", rejectedButton);
-        helper.setSubject("Fellowship Offer From BridgeLabz");
-        javaMailSender.send(message);
+                "link to accept the offer. " + "\n" + Accepted + "\nPlease click on following link to reject the offer. " + "\n" + Rejected);
+        mailDTO.setSubject("Fellowship Offer From BridgeLabz");
+        mailDTO.setFrom("akftechnologies2@gmail.com");
+        rabbitMQ.sendHiringMail(mailDTO);
     }
 
     @Override
     public Response sendJobOfferNotification() throws MessagingException {
-        List<HiredCandidate> acceptedCandidates = hiredCandidateRepository.findByStatus("Accepted");
+        List<HiredCandidate> acceptedCandidates = hiredCandidateRepository.findByStatus(Status.ACCEPTED.toString());
         for (HiredCandidate candidate : acceptedCandidates) {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message,true, "UTF-8");
-            String personalInfo = "<html><body><p><a href='http://localhost:8080/fellowshipcandidate/jointhecandidate'><img src='cid:identifier11'></a></p></body></html>";
-            String bankInfo = "<html><body><p><a href='http://localhost:8080/fellowshipcandidate/educationalinfo'><img src='cid:identifier22'></a></p></body></html>";
-            String educationalInfo = "<html><body><p><a href='http://localhost:8080/fellowshipcandidate/bankinfo'><img src='cid:identifier33'></a></p></body></html>";
-            helper.setTo(candidate.getEmail());
-            helper.setText("Hii, " + candidate.getFirstName() + " " + candidate.getLastName() + " " +
+            mailDTO.setTo(candidate.getEmail());
+            mailDTO.setBody("Hii, " + candidate.getFirstName() + " " + candidate.getLastName() + " " +
                     "As per your confirmation, You have been officially admitted to BridgeLabz Fellowship" +
                     " Program." + "\n\n" + "We need you to update your personal information, " +
                     "your bank information and your educational information " +
@@ -169,16 +173,10 @@ public class HiredCandidateService implements IHiredCandidateService {
                     "For Educational information : " + "\n\n" +
                     educationalInfo + "\n\n" +
                     "For Bank Information : " + "\n\n" +
-                    bankInfo,true
-            );
-            FileSystemResource personalInfoButton = new FileSystemResource(new File("C:\\Users\\personal\\Desktop\\lmsapi\\src\\main\\resources\\personal-info.jpg"));
-            helper.addInline("identifier11", personalInfoButton);
-            FileSystemResource educationalInfoButton = new FileSystemResource(new File("C:\\Users\\personal\\Desktop\\lmsapi\\src\\main\\resources\\educational-info.jpg"));
-            helper.addInline("identifier22", educationalInfoButton);
-            FileSystemResource bankInfoButton = new FileSystemResource(new File("C:\\Users\\personal\\Desktop\\lmsapi\\src\\main\\resources\\bank-info.jpg"));
-            helper.addInline("identifier33", bankInfoButton);
-            helper.setSubject("Fellowship Job from BridgeLabz");
-            javaMailSender.send(message);
+                    bankInfo);
+            mailDTO.setFrom("akftechnologies2@gmail.com");
+            mailDTO.setSubject("Fellowship Job from BridgeLabz");
+            rabbitMQ.sendJobOfferMail(mailDTO);
         }
         return new Response(102, ApplicationConfiguration.getMessageAccessor().getMessage("102"));
     }
