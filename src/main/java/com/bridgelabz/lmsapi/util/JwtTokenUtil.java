@@ -14,6 +14,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+/**
+ * Utility to generate tokens, extract data from tokens, validate tokens and other
+ */
 @Component
 public class JwtTokenUtil implements Serializable {
 
@@ -25,34 +28,66 @@ public class JwtTokenUtil implements Serializable {
 	@Value("${jwt.secret}")
 	private String secret;
 
+	/**
+	 * @param token
+	 * @return Username
+	 */
 	//retrieve username from jwt token
 	public String getUsernameFromToken(String token) {
 		return getClaimFromToken(token, Claims::getSubject);
 	}
 
+	/**
+	 * @param token
+	 * @return subject from token
+	 */
 	public String getSubjectFromToken(String token) {
 		return getClaimFromToken(token, Claims::getSubject);
 	}
+
+	/**
+	 * @param token
+	 * @return validity of token
+	 */
 	//retrieve expiration date from jwt token
 	public Date getExpirationDateFromToken(String token) {
 		return getClaimFromToken(token, Claims::getExpiration);
 	}
 
+	/**
+	 * @param token
+	 * @param claimsResolver
+	 * @param <T>
+	 * @return claims from token
+	 */
 	public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
 		final Claims claims = getAllClaimsFromToken(token);
 		return claimsResolver.apply(claims);
 	}
+
+	/**
+	 * @param token
+	 * @return claims from token
+	 */
     //for retrieveing any information from token we will need the secret key
 	private Claims getAllClaimsFromToken(String token) {
 		return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
 	}
 
+	/**
+	 * @param token
+	 * @return validity of token
+	 */
 	//check if the token has expired
 	public Boolean isTokenExpired(String token) {
 		final Date expiration = getExpirationDateFromToken(token);
 		return expiration.before(new Date());
 	}
 
+	/**
+	 * @param userDetails
+	 * @return generated token
+	 */
 	//generate token for user
 	public String generateToken(UserDetails userDetails) {
 		Map<String, Object> claims = new HashMap<>();

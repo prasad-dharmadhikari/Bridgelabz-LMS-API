@@ -8,8 +8,10 @@ import com.bridgelabz.lmsapi.repository.CandidateBankDetailsRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
 
+/**
+ * Service to update candidate bank details
+ */
 @Service
 public class CandidateBankDetailsService implements ICandidateBankDetailsService {
 
@@ -19,6 +21,10 @@ public class CandidateBankDetailsService implements ICandidateBankDetailsService
     @Autowired
     private CandidateBankDetailsRepository candidateBankDetailsRepository;
 
+    /**
+     * @param candidateBankDetailsDTO
+     * @return Bank details updation confirmation message
+     */
     @Override
     public Response updateCandidateBankInfo(CandidateBankDetailsDTO candidateBankDetailsDTO) {
         candidateBankDetailsDTO.setCreatorUser(candidateBankDetailsDTO.getAccountName());

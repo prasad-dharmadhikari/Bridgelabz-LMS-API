@@ -13,6 +13,9 @@ import org.modelmapper.PropertyMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service to join the candidates to fellowship program and get candidate count
+ */
 @Service
 public class FellowshipCandidateService implements IFellowshipCandidateService {
 
@@ -38,6 +41,10 @@ public class FellowshipCandidateService implements IFellowshipCandidateService {
         }
     };
 
+    /**
+     * @param fellowshipCandidateDTO
+     * @return Candidate joined successfully
+     */
     @Override
     public Response joinTheCandidateToFellowshipProgram(FellowshipCandidateDTO fellowshipCandidateDTO) {
         HiredCandidate acceptedCandidate = hiredCandidateRepository.findByStatusAndId(Status.ACCEPTED.toString(), fellowshipCandidateDTO.getCandidateId());
@@ -47,6 +54,9 @@ public class FellowshipCandidateService implements IFellowshipCandidateService {
         return new Response(107, ApplicationConfiguration.getMessageAccessor().getMessage("107"));
     }
 
+    /**
+     * @return No of candidates in fellowship program
+     */
     @Override
     public Response getCandidateCount() {
         return new Response(109,

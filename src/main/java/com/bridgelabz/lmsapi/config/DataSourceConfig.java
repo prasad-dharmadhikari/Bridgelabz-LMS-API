@@ -6,11 +6,16 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
+/**
+ * Configuration for Datasource
+ */
 @Configuration
 public class DataSourceConfig {
+    /**
+     * @return Data Source builder
+     */
     @Bean
-    public DataSource getDataSource()
-    {
+    public DataSource getDataSource() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
         dataSourceBuilder.driverClassName(System.getenv().get("driver.classname"));
         dataSourceBuilder.url(System.getenv().get("spring.datasource.url"));

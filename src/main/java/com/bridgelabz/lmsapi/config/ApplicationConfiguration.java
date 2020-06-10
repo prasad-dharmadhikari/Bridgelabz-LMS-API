@@ -7,11 +7,16 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import javax.annotation.PostConstruct;
 import java.util.Locale;
 
+/**
+ * Configuration for messages.properties to show custom messages in response
+ */
 @Configuration
-
 public class ApplicationConfiguration {
     private static MessageSourceAccessor messageSourceAccessor;
 
+    /**
+     * Method to access messages.properties file
+     */
     @PostConstruct
     private static void initMessageSourceAccessor() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
@@ -19,6 +24,9 @@ public class ApplicationConfiguration {
         messageSourceAccessor = new MessageSourceAccessor(messageSource, Locale.getDefault());
     }
 
+    /**
+     * @return message Source accessor
+     */
     public static MessageSourceAccessor getMessageAccessor() {
         return messageSourceAccessor;
     }

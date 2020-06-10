@@ -7,8 +7,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.bridgelabz.lmsapi.exception.LmsApiApplicationException;
 import com.bridgelabz.lmsapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,8 +20,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.bridgelabz.lmsapi.util.JwtTokenUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 
+/**
+ * Class to filter the requests with JWT token
+ */
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
+
+	private static final String REDIS_INDEX_KEY="LMS_TOKEN";
 
 	@Autowired
 	private UserService jwtUserDetailsService;
@@ -27,9 +34,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
 
+	@Autowired
+	private RedisTemplate<String, Object> redisTemplate;
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-			throws ServletException, IOException {
+			throws ServletException, IOException{
 
 		final String requestTokenHeader = request.getHeader("Authorization");
 
@@ -41,9 +51,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			jwtToken = requestTokenHeader.substring(7);
 			try {
 				username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+				Object token = redisTemplate.opsForHash().get(REDIS_INDEX_KEY, username);
+				if (!(jwtToken.equals(token))){
+					throw new LmsApiApplicationException(LmsApiApplicationException.exceptionType.INVALID_TOKEN,"Invalid token");
+				}
 			} catch (IllegalArgumentException e) {
 				System.out.println("Unable to get JWT Token");
-			} catch (ExpiredJwtException e) {
+			} catch (ExpiredJwtException | LmsApiApplicationException e) {
 				System.out.println("JWT Token has expired");
 			}
 		} else {

@@ -15,28 +15,24 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Service to save data in batch, send mails, and update candidate status
+ */
 @Service
 public class HiredCandidateService implements IHiredCandidateService {
 
     @Autowired
     private HiredCandidateRepository hiredCandidateRepository;
-
-    @Autowired
-    private JavaMailSender javaMailSender;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -51,6 +47,11 @@ public class HiredCandidateService implements IHiredCandidateService {
     String bankInfo = "<html><body><p><a href='http://localhost:8080/fellowshipcandidate/educationalinfo'><img src='cid:identifier22'></a></p></body></html>";
     String educationalInfo = "<html><body><p><a href='http://localhost:8080/fellowshipcandidate/bankinfo'><img src='cid:identifier33'></a></p></body></html>";
 
+    /**
+     * @param file
+     * @return Data saved successfully
+     * @throws LmsApiApplicationException
+     */
     @Override
     public Response saveDataInBatchToDatabase(MultipartFile file) throws LmsApiApplicationException {
         HiredCandidateDTO hiredCandidateDTO = new HiredCandidateDTO();
@@ -116,11 +117,19 @@ public class HiredCandidateService implements IHiredCandidateService {
         return new Response(105, ApplicationConfiguration.getMessageAccessor().getMessage("105"));
     }
 
+    /**
+     * @return data of all candidates
+     */
     @Override
     public List getHiredCandidateList() {
         return hiredCandidateRepository.findAll();
     }
 
+    /**
+     * @param hiredCandidateDTO
+     * @throws MessagingException
+     * @throws LmsApiApplicationException
+     */
     @Override
     public void save(HiredCandidateDTO hiredCandidateDTO) throws MessagingException, LmsApiApplicationException {
         HiredCandidate hiredCandidate = modelMapper.map(hiredCandidateDTO, HiredCandidate.class);
@@ -130,11 +139,21 @@ public class HiredCandidateService implements IHiredCandidateService {
         sendMail(hiredCandidate);
     }
 
+    /**
+     * @param id
+     * @return Candidate data by id
+     */
     @Override
     public HiredCandidate getCandidateProfile(long id) {
         return hiredCandidateRepository.findById(id).get();
     }
 
+    /**
+     * @param response
+     * @param email
+     * @return Updated candidate status
+     * @throws LmsApiApplicationException
+     */
     @Override
     public Response updateCandidateStatus(String response, String email) throws LmsApiApplicationException {
         HiredCandidate candidate = hiredCandidateRepository.findByEmail(email);
@@ -145,6 +164,10 @@ public class HiredCandidateService implements IHiredCandidateService {
         return new Response(106, ApplicationConfiguration.getMessageAccessor().getMessage("106"));
     }
 
+    /**
+     * @param hiredCandidate
+     * @throws MessagingException
+     */
     @Override
     public void sendMail(HiredCandidate hiredCandidate) throws MessagingException {
         String Accepted = "<html><body><p><a href='http://localhost:8080/hiredcandidate/updatestatus?response=ACCEPTED&email=" + hiredCandidate.getEmail() + "'><img src='cid:identifier1234'></a></p></body></html>";
@@ -158,6 +181,10 @@ public class HiredCandidateService implements IHiredCandidateService {
         rabbitMQ.sendHiringMail(mailDTO);
     }
 
+    /**
+     * @return Response to user about job offer notification
+     * @throws MessagingException
+     */
     @Override
     public Response sendJobOfferNotification() throws MessagingException {
         List<HiredCandidate> acceptedCandidates = hiredCandidateRepository.findByStatus(Status.ACCEPTED.toString());

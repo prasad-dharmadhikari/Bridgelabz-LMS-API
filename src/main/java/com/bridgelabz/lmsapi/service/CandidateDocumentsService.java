@@ -20,6 +20,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * Service to upload the candidate documents
+ */
 @Service
 public class CandidateDocumentsService implements ICandidateDocumentsService {
 
@@ -37,6 +40,13 @@ public class CandidateDocumentsService implements ICandidateDocumentsService {
     @Autowired
     private ModelMapper modelMapper;
 
+    /**
+     * @param file
+     * @param id
+     * @param type
+     * @return Documents uploaded successfully
+     * @throws IOException
+     */
     @Override
     public Response saveDocument(MultipartFile file, long id, String type) throws IOException {
         CandidateDocumentsDTO candidateDocumentsDTO = new CandidateDocumentsDTO();
@@ -52,12 +62,22 @@ public class CandidateDocumentsService implements ICandidateDocumentsService {
         return new Response(110, ApplicationConfiguration.getMessageAccessor().getMessage("110"));
     }
 
+    /**
+     * @param file
+     * @return uploaded file url
+     * @throws IOException
+     */
     private String uploadFile(MultipartFile file) throws IOException {
         File fileToUpload = convertMultipartToFile(file);
         Map uploadResult = cloudinary.uploader().upload(fileToUpload, ObjectUtils.emptyMap());
         return uploadResult.get("url").toString();
     }
 
+    /**
+     * @param file
+     * @return converted file
+     * @throws IOException
+     */
     private File convertMultipartToFile(MultipartFile file) throws IOException {
         File convFile = new File(file.getOriginalFilename());
         FileOutputStream fos = new FileOutputStream(convFile);
@@ -66,6 +86,10 @@ public class CandidateDocumentsService implements ICandidateDocumentsService {
         return convFile;
     }
 
+    /**
+     * @param id
+     * @return document by id
+     */
     @Override
     public CandidateDocuments getFile(long id) {
         return candidateDocumentsRepository.findById(id).get();

@@ -13,8 +13,12 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
 
+/**
+ * Utility to handle rabbitMQ messages.
+ */
 @Component
 public class RabbitMQ {
+
 
     @Autowired
     private AmqpTemplate rabbitTemplate;
@@ -28,6 +32,9 @@ public class RabbitMQ {
     FileSystemResource acceptedButton = new FileSystemResource(new File("C:\\Users\\personal\\Desktop\\lmsapi\\src\\main\\resources\\accepted.jpg"));
     FileSystemResource rejectedButton = new FileSystemResource(new File("C:\\Users\\personal\\Desktop\\lmsapi\\src\\main\\resources\\rejected.jpg"));
 
+    /**
+     * @param message
+     */
     // PRODUCER
     public void sendMessageToQueue(MailDTO message) {
         final String exchange = "QueueExchangeConn";
@@ -35,16 +42,27 @@ public class RabbitMQ {
         rabbitTemplate.convertAndSend(exchange, routingKey, message);
     }
 
+    /**
+     * @param message
+     */
     @RabbitListener(queues = "${spring.rabbitmq.template.default-receive-queue}")
     public void send(MimeMessage message) {
         javaMailSender.send(message);
     }
+
+    /**
+     * @param message
+     */
     // listener
     @RabbitListener(queues = "${spring.rabbitmq.template.default-receive-queue}")
     public void receiveMessage(MimeMessage message) {
         send(message);
     }
 
+    /**
+     * @param mailDTO
+     * @throws MessagingException
+     */
     public void sendHiringMail(MailDTO mailDTO) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -57,6 +75,10 @@ public class RabbitMQ {
         send(message);
     }
 
+    /**
+     * @param mailDTO
+     * @throws MessagingException
+     */
     public void sendJobOfferMail(MailDTO mailDTO) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");

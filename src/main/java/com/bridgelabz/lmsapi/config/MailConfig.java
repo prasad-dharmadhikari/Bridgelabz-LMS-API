@@ -7,8 +7,14 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Class to configure mail properties
+ */
 @Configuration
 public class MailConfig {
+    /**
+     * @return JavaMailSender object
+     */
     @Bean
     public JavaMailSender getJavaMailSender() {
         Map<String, String> map = System.getenv();
