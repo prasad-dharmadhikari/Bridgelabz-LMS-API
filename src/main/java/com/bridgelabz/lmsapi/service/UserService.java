@@ -11,8 +11,10 @@ import com.bridgelabz.lmsapi.exception.LmsApiApplicationException;
 import com.bridgelabz.lmsapi.model.User;
 import com.bridgelabz.lmsapi.repository.UserRepository;
 import com.bridgelabz.lmsapi.util.JwtTokenUtil;
+import com.bridgelabz.lmsapi.util.RedisUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,8 +29,15 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
+/**
+ * Service to save data in database, generate tokens and send mails to
+ * users to reset the forgotten password
+ */
 @Service
 public class UserService implements IUserService, UserDetailsService {
+
+    @Value("${spring.redis.key}")
+    private String REDIS_INDEX_KEY;
 
     @Autowired
     private UserRepository userRepository;
@@ -48,6 +57,14 @@ public class UserService implements IUserService, UserDetailsService {
     @Autowired
     private JavaMailSender javaMailSender;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
+    /**
+     * @param username
+     * @return User details by username
+     * @throws UsernameNotFoundException
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUserName(username);
@@ -57,6 +74,10 @@ public class UserService implements IUserService, UserDetailsService {
         return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(), new ArrayList<>());
     }
 
+    /**
+     * @param userDTO
+     * @return data saved successfully
+     */
     @Override
     public Response save(UserDTO userDTO) {
         userDTO.setCreatorStamp(LocalDateTime.now());
@@ -68,14 +89,26 @@ public class UserService implements IUserService, UserDetailsService {
         return new Response(101, ApplicationConfiguration.getMessageAccessor().getMessage("101"));
     }
 
+    /**
+     * @param loginRequest
+     * @return JWT token
+     * @throws Exception
+     */
     @Override
     public String getAuthenticationToken(LoginDTO loginRequest) throws Exception {
         authenticate(loginRequest.getUsername(), loginRequest.getPassword());
         final UserDetails userDetails = loadUserByUsername(loginRequest.getUsername());
         final String token = jwtTokenUtil.generateToken(userDetails);
-        return token;
+        redisUtil.save(REDIS_INDEX_KEY, loginRequest.getUsername(), token);
+        return redisUtil.get(REDIS_INDEX_KEY, loginRequest.getUsername()).toString();
     }
 
+    /**
+     * @param email
+     * @return mail sent successfully
+     * @throws MessagingException
+     * @throws LmsApiApplicationException
+     */
     @Override
     public Response sendMail(String email) throws MessagingException, LmsApiApplicationException {
         User user = userRepository.findByEmail(email);
@@ -92,6 +125,12 @@ public class UserService implements IUserService, UserDetailsService {
         return new Response(102, ApplicationConfiguration.getMessageAccessor().getMessage("102"));
     }
 
+    /**
+     * @param token
+     * @param password
+     * @return password reset successfully
+     * @throws LmsApiApplicationException
+     */
     @Override
     public Response resetPassword(String token, String password) throws LmsApiApplicationException {
         if (jwtTokenUtil.isTokenExpired(token)) {
@@ -107,6 +146,11 @@ public class UserService implements IUserService, UserDetailsService {
         return new Response(104, ApplicationConfiguration.getMessageAccessor().getMessage("104"));
     }
 
+    /**
+     * @param username
+     * @param password
+     * @throws Exception
+     */
     public void authenticate(String username, String password) throws Exception {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
